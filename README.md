@@ -16,6 +16,6 @@ The results are displayed in both raw XML format and as a formatted HTML table u
 - A valid `USERID` from USPS Web Tools to use the Address Validation API.
 
 ### Installation
-1. Clone this repository:
+Clone this repository:
    ```bash
-   git clone https://github.com/<your-username>/usps-address-validation.git
+   git clone https://github.com/jlq76/uspsValidator.git
