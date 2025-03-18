@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>USPS Validation Form</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <script lang="javascript">
+        function prepare(obj) {
+            myForm = obj.parentNode;
+            ukey = myForm.ukey.value;
+            line1= myForm.line1.value;
+            line2= myForm.line2.value;
+            city= myForm.city.value;
+            state= myForm.state.value;
+            zip= myForm.zip.value;
+            strQuery=   '<AddressValidateRequest USERID="'+ ukey +'"> <Revision>1</Revision> <Address ID="0">'+
+                        "<Address1>" + line1 + "</Address1>" + 
+                        "<Address2>" + line2 + "</Address2>" + 
+                        "<City>" + city + "</City>"+ 
+                        "<State>" + state + "</State>" +
+                        "<Zip5>" + zip + "</Zip5>" +
+                        "<Zip4></Zip4> </Address></AddressValidateRequest>";
+            myForm.strQuery.value = strQuery;
+
+            myUrl = "https://secure.shippingapis.com/ShippingApi.dll?API=Verify&XML=" + strQuery;
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", myUrl, false ); // false for synchronous request
+            xmlHttp.send( null );
+            urlAnswer= xmlHttp.responseText;
+            myForm.urlAnswer.value= urlAnswer;
+
+            if (urlAnswer.includes("ReturnText") || urlAnswer.includes("Error"))
+                myForm.urlAnswer.style.backgroundColor='red';
+            else 
+                myForm.urlAnswer.style.backgroundColor='green';
+        
+                xml2Table(urlAnswer);
+        }
+
+        var xsl= '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">         \
+                    <xsl:template match="/">    \
+                        <table border="1" style="border-collapse:collapse">  \
+                            <tr bgcolor="#eee"> \
+                                <th style="text-align:left">  Address1  </th>  \
+                                <th style="text-align:left">  Address2  </th>  \
+                                <th style="text-align:left">  City  </th>   \
+                                <th style="text-align:left">  State  </th>  \
+                                <th style="text-align:left">  Zip5  </th>   \
+                                <th style="text-align:left">  Zip4  </th>   \
+                                <th style="text-align:left">  ReturnText  </th> \
+                            </tr>    \
+                            <xsl:for-each select="AddressValidateResponse/Address"> \
+                                <tr> \
+                                <td><xsl:value-of select="Address1"/></td> \
+                                <td><xsl:value-of select="Address2"/></td> \
+                                <td><xsl:value-of select="City"/></td> \
+                                <td><xsl:value-of select="State"/></td>    \
+                                <td><xsl:value-of select="Zip5"/></td> \
+                                <td><xsl:value-of select="Zip4"/></td> \
+                                <td><xsl:value-of select="ReturnText"/></td>    \
+                            </tr>   \
+                            </xsl:for-each> \
+                        </table>    \
+                    </xsl:template> \
+                </xsl:stylesheet>';
+
+        function xml2Table(xml){
+
+            var parser = new DOMParser();
+            var xsl_doc = parser.parseFromString(xsl, "application/xml");
+            var xml_doc = parser.parseFromString(xml, "application/xml");
+
+            xsltProcessor = new XSLTProcessor();
+            xsltProcessor.importStylesheet(xsl_doc);
+            resultDocument = xsltProcessor.transformToFragment(xml_doc, document);
+            document.getElementById("xsltZone").innerHTML="";
+            document.getElementById("xsltZone").appendChild(resultDocument);
+        }
+    </script>
+</head>
+<style>
+    label {width:80px; display:inline-block;}
+</style>
+<body>
+    <form>
+        <label for="ukey">uKey:</label><input type="password" id="ukey" value=""/><br/>
+        <label for="line1">Line 1:</label><input type="text" id="line1" value=""/><br/>
+        <label for="line2">Line 2:</label><input type="text" id="line2"/><br/>
+        <label for="city">City:</label><input type="text" id="city" value=""/><br/>
+        <label for="state">State:</label><input type="text" id="state" value="" /><br/>
+        <label for="zip">ZIP:</label><input type="text" id="zip"/><br/>
+        <input type="button" value="submit" onclick="prepare(this);"><br/>
+        Query Parameters:<br/>
+        <textarea id="strQuery" rows=4 cols=80> </textarea><br/>
+        Answer:<br/>
+        <textarea id="urlAnswer" rows=20 cols=80> </textarea>
+        <div id="xsltZone"></div>
+    </form>
+</body>
+</html>
