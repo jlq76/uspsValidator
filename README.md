@@ -1,3 +1,8 @@
+# Deprecation Notice: USPS API Retirement
+**Important Notice:**
+The USPS API currently used in this project will be retired in **January 2026**. After that date, the code utilizing the USPS API will **no longer work**.
+
+
 # USPS Address Validation Form
 
 A simple web-based form for validating postal addresses using the USPS Web Tools API. 
